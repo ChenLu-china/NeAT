@@ -97,20 +97,25 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
     std::cout << "Name " << scene_name << std::endl;
     std::cout << "saving in " << out_dir << std::endl;
 
-
     DatasetParams out_params;
 
-    Directory dir(scene_path);
-    auto info_files = dir.getFilesEnding(".ctprofile.xml");
-    CHECK_EQ(info_files.size(), 1);
-    auto dataset_name = info_files.front().substr(0, info_files.front().size() - 14);
+    //auto info_files = dir.getFilesEnding(".ctprofile.xml");
+   // CHECK_EQ(info_files.size(), 1);
+   // auto dataset_name = info_files.front().substr(0, info_files.front().size() - 14);
+    auto dataset_name = "Pepper_CT_parameters";
     std::cout << "Dataset name: " << dataset_name << std::endl;
+
+    auto ct_params = XTekCT(scene_path + "/" + dataset_name + ".xtekct");
+    scene_path+="/projections";
+    Directory dir(scene_path);
+
 
     auto image_names = dir.getFilesEnding(".tif");
     std::sort(image_names.begin(), image_names.end());
 
+    std::cout << "TEST SIZE:" << scene_path << " - " << image_names.size() << std::endl;
 
-    auto ct_params = XTekCT(scene_path + "/" + dataset_name + ".xtekct");
+
 
 
 
@@ -312,7 +317,7 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
 int main(int argc, const char* argv[])
 {
 
-    std::string input_base  = "/HD/New_scans/";
+    std::string input_base  = "/home/linus/repos/z_downloads/";
     std::string output_base = "scenes/";
     Convert(input_base + "/Pepper", output_base + "/pepper", ivec2(50, 20), ivec2(1880, 1400), 1);
     // Convert(input_base + "/Teapot_90kV", output_base + "/teapot", ivec2(-1, -1), ivec2(-1, 1350), 1, 17500);

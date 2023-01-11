@@ -552,6 +552,7 @@ class Trainer
                 SampleList all_samples =
                     tree->CreateSamplesForRays(rays, params->octree_params.max_samples_per_node, false);
 
+           //     std::cout << TensorInfo(all_samples.ray_t) << TensorInfo(rays.direction)<<  TensorInfo(rays.origin) << std::endl;
                 auto predicted_image =
                     neural_geometry->ComputeImage(all_samples, scene->num_channels, sample_data.NumPixels());
                 predicted_image =
@@ -559,6 +560,7 @@ class Trainer
 
                 if (sample_data.pixels.target_mask.defined())
                 {
+            //        std::cout << "MASKED" << std::endl;
                     // Multiply by mask so the loss of invalid pixels is 0
                     predicted_image           = predicted_image * sample_data.pixels.target_mask;
                     sample_data.pixels.target = sample_data.pixels.target * sample_data.pixels.target_mask;
@@ -597,6 +599,7 @@ class Trainer
 
                 image_count += sample_data.batch_size;
 
+          //      std::cout << image_count << " _ "<<  epoch_loss_train_mse << std::endl;
                 bar.SetPostfix(" MSE=" + std::to_string(epoch_loss_train_mse / image_count));
                 bar.addProgress(sample_data.NumPixels());
             }
@@ -768,8 +771,67 @@ int main(int argc, const char* argv[])
     auto params = std::make_shared<CombinedParams>(LoadParamsHybrid<CombinedParams>(argc, argv));
 
     std::string experiment_dir = PROJECT_DIR.append("Experiments");
+    if(params->train_params.experiment_dir_override != ""){
+        experiment_dir = params->train_params.experiment_dir_override;
+    }
     std::filesystem::create_directories(experiment_dir);
-    experiment_dir = experiment_dir + "/" + params->train_params.ExperimentString() + "/";
+
+    {
+        //transfer image folder to local tmp folder (mostly for clusters)
+        //images should be in scene folder
+        if(!params->train_params.temp_image_dir.empty()){
+            std::cout << "Copy scene to local temp folder" << std::endl;
+            std::string job_id_sub_folder = "_x_/";
+            if(std::getenv("SLURM_JOBID") != nullptr){
+                job_id_sub_folder = "/_" + std::string(std::getenv("SLURM_JOBID")) + "_/";
+            }
+            std::filesystem::create_directory(params->train_params.temp_image_dir + job_id_sub_folder );
+            for (int i = 0; i < params->train_params.scene_name.size(); ++i)
+            {
+                std::string scene_name = params->train_params.scene_name[i];
+                std::string path_to_sc = params->train_params.scene_dir + scene_name;
+
+                std::string path_to_tmp = params->train_params.temp_image_dir + job_id_sub_folder + scene_name;
+
+                std::cout << "Copy " << path_to_sc << " to " << path_to_tmp << std::endl;
+
+                std::filesystem::remove_all(path_to_tmp);
+                std::filesystem::copy(path_to_sc, path_to_tmp, std::filesystem::copy_options::recursive);
+
+                {
+                    std::string file_ini = path_to_tmp + "/dataset.ini";
+                    SAIGA_ASSERT(std::filesystem::exists(file_ini));
+                    auto dataset_params = DatasetParams(file_ini);
+
+                    if(!std::filesystem::exists(path_to_tmp+ "/images/"))
+                        std::filesystem::copy(dataset_params.image_dir, path_to_tmp + "/images/", std::filesystem::copy_options::recursive);
+                    //std::filesystem::remove_all(path_to_tmp+ "/images/");
+                    std::cout << "replace image dir with " << path_to_tmp + "/images/" << std::endl;
+                    dataset_params.image_dir = path_to_tmp + "/images/";
+                  //  if (params->train_params.use_image_masks)
+                  //  {
+                  //      if(!std::filesystem::exists(path_to_tmp+ "/masks/"))
+                  //          std::filesystem::copy(dataset_params.mask_dir, path_to_tmp + "/masks/", std::filesystem::copy_options::recursive);
+                  //      //std::filesystem::remove_all(path_to_tmp+ "/images/");
+                  //      std::cout << "replace mask dir with " << path_to_tmp + "/masks/" << std::endl;
+                  //      dataset_params.mask_dir = path_to_tmp + "/masks/";
+                  //  }
+
+                    std::filesystem::remove(file_ini);
+                    dataset_params.Save(file_ini);
+                }
+            }
+            params->train_params.scene_dir = params->train_params.temp_image_dir + job_id_sub_folder;
+            std::cout << "Finished copying" << std::endl;
+        }
+    }
+
+    //override standard time-based experiment name if wanted
+    if(params->train_params.experiment_name_str == "")
+        experiment_dir = experiment_dir + "/" + params->train_params.ExperimentString() + "/";
+    else
+        experiment_dir = experiment_dir + "/" + params->train_params.experiment_name_str + "/";
+
     std::filesystem::create_directories(experiment_dir);
     params->Save(experiment_dir + "/params.ini");
 

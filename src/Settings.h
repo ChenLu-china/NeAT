@@ -201,11 +201,19 @@ struct MyTrainParams : public TrainParams
         SAIGA_PARAM(loss_edge);
         SAIGA_PARAM(eval_scale);
 
+        SAIGA_PARAM(experiment_name_str);
+        SAIGA_PARAM(experiment_dir_override);
+
+        SAIGA_PARAM(temp_image_dir);
+
     }
 
     std::string scene_dir               = "";
     std::vector<std::string> scene_name = {"pepper"};
     std::string split_name              = "exp_uniform_50";
+    std::string experiment_name_str     = "";
+    std::string experiment_dir_override = "";
+    std::string temp_image_dir          = "";
 
     int optimize_structure_every_epochs  = 1;
     float optimize_structure_convergence = 0.95;
