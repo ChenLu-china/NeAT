@@ -165,6 +165,7 @@ class Trainer
                     {
                         auto volume_out_dir = ep_dir + "/volume_" + scene->scene_name + "/";
                         std::filesystem::create_directories(volume_out_dir);
+                        std::filesystem::create_directories(ep_dir + "/volume_" + scene->scene_name + "/density/");
 
                         int out_size = params->train_params.output_volume_size;
                         if (epoch_id == params->train_params.num_epochs)

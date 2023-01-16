@@ -338,7 +338,7 @@ void HierarchicalNeuralGeometry::SaveVolume(TensorBoardLogger* tblogger, std::st
         {
             TensorToImage<ucvec3>(structure_img).save(out_dir + "/" + leadingZeroString(i, 5) + "_structure.png");
             TensorToImage<unsigned char>(volume_density_raw.slice(1, i, i + 1).squeeze(1))
-                .save(out_dir + "/" + leadingZeroString(i, 5) + "_density.png");
+                .save(out_dir + "/density/" + leadingZeroString(i, 5) + ".png");
         }
         LogImage(tblogger, saiga_img, tb_name, i);
         bar.addProgress(1);
