@@ -147,7 +147,7 @@ torch::Tensor HierarchicalNeuralGeometry::DecodeFeatures(torch::Tensor neural_fe
     {
         // sigmoid for the color and relu for the density
         int num_channels = decoded_features.size(2);
-        CHECK_GT(num_channels, 1);
+        TORCH_CHECK_GT(num_channels, 1);
         auto color       = decoded_features.slice(2, 0, num_channels - 1);
         auto density     = decoded_features.slice(2, num_channels - 1, num_channels);
         color            = torch::sigmoid(color);
@@ -382,7 +382,7 @@ torch::Tensor HierarchicalNeuralGeometry::ComputeImage(SampleList all_samples, i
         SAIGA_OPTIONAL_TIME_MEASURE("IntegrateSamplesXRay", timer);
         // [num_channels, num_rays]
         predicted_image = IntegrateSamplesXRay(sample_output, weight, ray_index, num_channels, num_pixels);
-        CHECK_EQ(predicted_image.size(0), num_channels);
+        TORCH_CHECK_EQ(predicted_image.size(0), num_channels);
     }
 
     return predicted_image;
@@ -402,7 +402,7 @@ torch::Tensor NeuralGeometry::IntegrateSamplesXRay(torch::Tensor sample_values, 
     }
 
 
-    CHECK_EQ(sample_values.dim(), integration_weight.dim());
+    TORCH_CHECK_EQ(sample_values.dim(), integration_weight.dim());
     sample_values = sample_values * integration_weight;
 
     // [num_channels, num_samples]
@@ -418,7 +418,7 @@ torch::Tensor NeuralGeometry::IntegrateSamplesXRay(torch::Tensor sample_values, 
     density_integral.index_add_(1, linear_ray_index, linear_sample_output);
 
 
-    CHECK_EQ(density_integral.dim(), 2);
+    TORCH_CHECK_EQ(density_integral.dim(), 2);
 
     return density_integral;
 }
@@ -434,9 +434,9 @@ torch::Tensor NeuralGeometry::IntegrateSamplesAlphaBlending(torch::Tensor sample
     {
         return torch::zeros({num_channels - 1, num_rays}, sample_values.device());
     }
-    CHECK_GT(num_rays, 0);
-    CHECK_GT(max_samples_per_ray, 0);
-    CHECK_GT(num_channels, 0);
+    TORCH_CHECK_GT(num_rays, 0);
+    TORCH_CHECK_GT(max_samples_per_ray, 0);
+    TORCH_CHECK_GT(num_channels, 0);
     CHECK(sample_index_in_ray.defined());
 
     //    std::cout << "Test IntegrateSamplesAlphaBlending " << num_rays << " " << max_samples_per_ray << std::endl;
@@ -492,7 +492,7 @@ torch::Tensor NeuralGeometry::IntegrateSamplesAlphaBlending(torch::Tensor sample
     auto expanded_by_one     = torch::cat({torch::ones({num_rays, 1}, alpha.options()), 1. - alpha + 1e-10}, 1);
     auto prod                = torch::cumprod(expanded_by_one, 1);
     auto original_shape_prod = prod.slice(1, 0, max_samples_per_ray);
-    CHECK_EQ(original_shape_prod.sizes(), alpha.sizes());
+    TORCH_CHECK_EQ(original_shape_prod.sizes(), alpha.sizes());
     // [num_rays, max_samples_per_ray]
     auto weights = alpha * original_shape_prod;
     // PrintTensorInfo(weights);

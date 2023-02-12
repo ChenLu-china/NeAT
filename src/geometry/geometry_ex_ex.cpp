@@ -71,7 +71,7 @@ torch::Tensor GeometryExEx::SampleVolume(torch::Tensor global_coordinate, torch:
         SAIGA_OPTIONAL_TIME_MEASURE("ComputeLocalSamples", timer);
         local_samples = tree->ComputeLocalSamples(global_coordinate, node_id);
     }
-    CHECK_EQ(local_samples.requires_grad(), global_coordinate.requires_grad());
+    TORCH_CHECK_EQ(local_samples.requires_grad(), global_coordinate.requires_grad());
 
     {
         SAIGA_OPTIONAL_TIME_MEASURE("grid_sampler->forward", timer);

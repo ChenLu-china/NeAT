@@ -100,7 +100,7 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
     DatasetParams out_params;
 
     //auto info_files = dir.getFilesEnding(".ctprofile.xml");
-   // CHECK_EQ(info_files.size(), 1);
+   // TORCH_CHECK_EQ(info_files.size(), 1);
    // auto dataset_name = info_files.front().substr(0, info_files.front().size() - 14);
     auto dataset_name = "Pepper_CT_parameters";
     std::cout << "Dataset name: " << dataset_name << std::endl;
@@ -233,7 +233,7 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
                     }
                 }
             }
-            CHECK_GT(img_min, intensity_threshold);
+            TORCH_CHECK_GT(img_min, intensity_threshold);
 
             cropped.save(out_params.image_dir + "/" + new_image_names[i]);
             mask.save(out_params.mask_dir + "/" + new_image_names[i]);

@@ -41,7 +41,7 @@ class RandomMultiSceneDataset : public torch::data::BatchDataset<RandomMultiScen
                             std::shared_ptr<CombinedParams> params, int rays_per_image)
         : indices_list(indices), scene_list(scene), params(params), rays_per_image(rays_per_image)
     {
-        CHECK_GT(rays_per_image, 0);
+        TORCH_CHECK_GT(rays_per_image, 0);
         total_num_images = 0;
         for (auto& i : indices)
         {

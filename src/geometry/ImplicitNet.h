@@ -60,9 +60,9 @@ class FCBlockImpl : public torch::nn::Module
 
     at::Tensor forward(at::Tensor x)
     {
-        CHECK_EQ(in_features, x.size(-1));
+        TORCH_CHECK_EQ(in_features, x.size(-1));
         x = seq->forward(x);
-        CHECK_EQ(out_features, x.size(-1));
+        TORCH_CHECK_EQ(out_features, x.size(-1));
         return x;
     }
 
@@ -127,9 +127,9 @@ class NeuralGridSamplerImpl : public torch::nn::Module
 
     torch::Tensor forward(at::Tensor features_in, at::Tensor relative_coordinates)
     {
-        CHECK_EQ(relative_coordinates.dim(), 3);
+        TORCH_CHECK_EQ(relative_coordinates.dim(), 3);
         int D = relative_coordinates.size(2);
-        CHECK_EQ(features_in.dim(), D + 2);
+        TORCH_CHECK_EQ(features_in.dim(), D + 2);
 
         auto opt = torch::nn::functional::GridSampleFuncOptions();
         opt      = opt.padding_mode(torch::kBorder).mode(torch::kBilinear).align_corners(align_corners);

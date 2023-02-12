@@ -7,7 +7,10 @@
 #include "saiga/cuda/cudaHelper.h"
 #include "saiga/vision/kernels/BA.h"
 #include "saiga/vision/torch/CudaHelper.h"
+//Torch changed their logging and checking interface
+#define CHECK_EQ TORCH_CHECK_EQ
 #include "saiga/vision/torch/EigenTensor.h"
+#undef CHECK_EQ
 #include "saiga/vision/torch/TorchHelper.h"
 
 #include "CameraPose.h"
@@ -92,7 +95,7 @@ struct RotatePoint : public Function<RotatePoint>
 
     static variable_list backward(AutogradContext* ctx, variable_list input_gradients)
     {
-        CHECK_EQ(input_gradients.size(), 1);
+        TORCH_CHECK_EQ(input_gradients.size(), 1);
         auto in_grad_point = input_gradients[0];
         //        std::cout << "rotate backward " << input_gradients.size() << std::endl;
         //        for (auto t : input_gradients)
@@ -101,7 +104,7 @@ struct RotatePoint : public Function<RotatePoint>
         //        }
 
         auto saved_variables = ctx->get_saved_variables();
-        CHECK_EQ(saved_variables.size(), 3);
+        TORCH_CHECK_EQ(saved_variables.size(), 3);
         auto rotation = saved_variables[0];
         auto points   = saved_variables[1];
         auto index    = saved_variables[2];
@@ -186,11 +189,11 @@ void CameraPoseModuleImpl::ApplyTangent()
 
 torch::Tensor CameraPoseModuleImpl::RotatePoint(torch::Tensor p, torch::Tensor index)
 {
-    CHECK_EQ(p.device(), rotation.device());
+    TORCH_CHECK_EQ(p.device(), rotation.device());
 
 
     auto list = torch::autograd::RotatePoint::apply(rotation, rotation_tangent, p, index);
-    CHECK_EQ(list.size(), 1);
+    TORCH_CHECK_EQ(list.size(), 1);
     return list.front();
 
 

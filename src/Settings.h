@@ -116,6 +116,7 @@ struct DatasetParams : public ParamsBase
         SAIGA_PARAM(volume_file);
         SAIGA_PARAM(log_space_input);
         SAIGA_PARAM(use_log10_conversion);
+        SAIGA_PARAM(z_min);
     }
 
     // only set if a ground truth volume exists
@@ -146,6 +147,8 @@ struct DatasetParams : public ParamsBase
     // ropeball: 26000, 63600
     double xray_min = 0;
     double xray_max = 65535;
+
+    double z_min = 0;
 
 
     // true: log10

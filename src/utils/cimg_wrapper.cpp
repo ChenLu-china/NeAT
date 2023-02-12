@@ -42,8 +42,8 @@ void SaveHDRImageTensor(torch::Tensor volume, const std::string& path)
 {
     using namespace cimg_library;
     // one channel volume
-    CHECK_EQ(volume.dim(), 4);
-    // CHECK_EQ(volume.size(0), 1);
+    TORCH_CHECK_EQ(volume.dim(), 4);
+    // TORCH_CHECK_EQ(volume.size(0), 1);
 
 
     volume = volume.contiguous();

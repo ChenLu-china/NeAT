@@ -374,7 +374,7 @@ class Trainer
                 sample_data.pixels.target = sample_data.pixels.target * sample_data.pixels.target_mask;
             }
 
-            CHECK_EQ(predicted_image.sizes(), sample_data.pixels.target.sizes());
+            TORCH_CHECK_EQ(predicted_image.sizes(), sample_data.pixels.target.sizes());
             auto per_ray_loss_mse = ((predicted_image - sample_data.pixels.target)).square();
             auto per_ray_loss     = per_ray_loss_mse;
 
@@ -567,10 +567,10 @@ class Trainer
                     sample_data.pixels.target = sample_data.pixels.target * sample_data.pixels.target_mask;
                 }
 
-                CHECK_EQ(predicted_image.sizes(), sample_data.pixels.target.sizes());
+                TORCH_CHECK_EQ(predicted_image.sizes(), sample_data.pixels.target.sizes());
                 auto per_ray_loss_mse = ((predicted_image - sample_data.pixels.target)).square();
 
-                // CHECK_EQ(image_samples.image_index.size(0), 1);
+                // TORCH_CHECK_EQ(image_samples.image_index.size(0), 1);
                 int image_id = sample_data.image_id;
 
                 if (projection_images[image_id].is_cpu())
@@ -638,8 +638,8 @@ class Trainer
                 // auto actual_target   = img->projection;
                 // PrintTensorInfo(ground_truth-actual_target);
 
-                CHECK_EQ(ground_truth.dim(), 4);
-                CHECK_EQ(predicted_image.dim(), 4);
+                TORCH_CHECK_EQ(ground_truth.dim(), 4);
+                TORCH_CHECK_EQ(predicted_image.dim(), 4);
 
                 auto image_loss_mse = ((predicted_image - ground_truth)).square();
                 auto image_loss_l1  = ((predicted_image - ground_truth)).abs();
@@ -648,7 +648,7 @@ class Trainer
                 epoch_loss_train_l1 += image_loss_l1.mean().item().toFloat();
 
                 auto err_col_tens = ColorizeTensor(image_loss_l1.squeeze(0).mean(0) * 4, colorizeTurbo).unsqueeze(0);
-                CHECK_EQ(err_col_tens.dim(), 4);
+                TORCH_CHECK_EQ(err_col_tens.dim(), 4);
 
                 if (!checkpoint_name.empty())
                 {
@@ -769,6 +769,12 @@ ParamType LoadParamsHybrid(int argc, const char* argv[])
 
 int main(int argc, const char* argv[])
 {
+
+    std::cout << "PyTorch version: "
+              << TORCH_VERSION_MAJOR << "."
+              << TORCH_VERSION_MINOR << "."
+              << TORCH_VERSION_PATCH << std::endl;
+    
     auto params = std::make_shared<CombinedParams>(LoadParamsHybrid<CombinedParams>(argc, argv));
 
     std::string experiment_dir = PROJECT_DIR.append("Experiments");

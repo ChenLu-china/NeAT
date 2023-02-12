@@ -5,10 +5,13 @@
  */
 #include "saiga/cuda/cuda.h"
 #include "saiga/vision/torch/CudaHelper.h"
+
+//Torch changed their logging and checking interface
+#define CHECK_EQ TORCH_CHECK_EQ
 #include "saiga/vision/torch/EigenTensor.h"
+#undef CHECK_EQ
 
 #include "SceneBase.h"
-
 
 static __global__ void PointInAnyImage(StaticDeviceTensor<double, 2> point, StaticDeviceTensor<double, 2> rotation,
                                        StaticDeviceTensor<double, 2> translation,

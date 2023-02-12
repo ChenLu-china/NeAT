@@ -140,10 +140,10 @@ PhotometricCalibrationImpl::PhotometricCalibrationImpl(int num_images, int num_c
                                                        PhotometricCalibrationParams params)
     : params(params)
 {
-    CHECK_GT(num_images, 0);
-    CHECK_GT(num_cameras, 0);
-    CHECK_GT(w, 0);
-    CHECK_GT(h, 0);
+    TORCH_CHECK_GT(num_images, 0);
+    TORCH_CHECK_GT(num_cameras, 0);
+    TORCH_CHECK_GT(w, 0);
+    TORCH_CHECK_GT(h, 0);
 
     exposure_factor = torch::ones({num_images});
     //    exposure_bias   = torch::full({num_images}, params.bias_init);

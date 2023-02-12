@@ -157,7 +157,7 @@ void HyperTreeBaseImpl::SetActive(int depth)
 void HyperTreeBaseImpl::UpdateActive()
 {
     // A culled node is not allowed to be active
-    CHECK_EQ((this->node_active.cpu() * this->node_culled.cpu()).sum().item().toInt(), 0);
+    TORCH_CHECK_EQ((this->node_active.cpu() * this->node_culled.cpu()).sum().item().toInt(), 0);
 
     auto node_active = this->node_active.to(torch::kCPU);
     std::vector<long> active_node_ids;
@@ -212,8 +212,8 @@ torch::Tensor HyperTreeBaseImpl::InactiveNodeIds()
 
 void HyperTreeBaseImpl::SetErrorForActiveNodes(torch::Tensor error, std::string strategy)
 {
-    CHECK_EQ(error.sizes(), node_error.sizes());
-    CHECK_EQ(error.device(), node_error.device());
+    TORCH_CHECK_EQ(error.sizes(), node_error.sizes());
+    TORCH_CHECK_EQ(error.device(), node_error.device());
 
     auto active_float   = node_active.to(torch::kFloat32);
     auto inactive       = (1 - active_float);
