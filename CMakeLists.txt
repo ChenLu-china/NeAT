@@ -14,7 +14,7 @@ DefaultBuildType(RelWithDebInfo)
 
 message("Build Options")
 
-OptionsHelper(HEADLESS "Skips the viewer and other apps that require a window." OFF)
+OptionsHelper(HEADLESS "Skips the viewer and other apps that require a window." ON)
 
 ############# Required LIBRARIES ###############
 
