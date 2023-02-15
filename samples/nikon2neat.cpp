@@ -85,7 +85,7 @@ struct XTekCT : public ParamsBase
 
 
 
-void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 crop_high, float scene_scale,
+void Convert(std::string dataset_name, std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 crop_high, float scene_scale,
              int intensity_threshold = 0)
 {
     std::filesystem::create_directories(out_dir);
@@ -97,25 +97,15 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
     std::cout << "Name " << scene_name << std::endl;
     std::cout << "saving in " << out_dir << std::endl;
 
+
     DatasetParams out_params;
 
-    //auto info_files = dir.getFilesEnding(".ctprofile.xml");
-   // TORCH_CHECK_EQ(info_files.size(), 1);
-   // auto dataset_name = info_files.front().substr(0, info_files.front().size() - 14);
-    auto dataset_name = "Pepper_CT_parameters";
-    std::cout << "Dataset name: " << dataset_name << std::endl;
-
-    auto ct_params = XTekCT(scene_path + "/" + dataset_name + ".xtekct");
-    scene_path+="/projections";
-    Directory dir(scene_path);
-
-
+    Directory dir(scene_path + "/projections");
     auto image_names = dir.getFilesEnding(".tif");
     std::sort(image_names.begin(), image_names.end());
 
-    std::cout << "TEST SIZE:" << scene_path << " - " << image_names.size() << std::endl;
 
-
+    auto ct_params = XTekCT(scene_path + "/" + dataset_name + "_CT_parameters.xtekct");
 
 
 
@@ -190,7 +180,7 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
         //                        for (int i = 0; i < 4; ++i)
         {
             // std::cout << "Loading image " << scene_path + "/" + image_names[i] << std::endl;
-            TemplatedImage<unsigned short> raw(scene_path + "/" + image_names[i]);
+            TemplatedImage<unsigned short> raw(scene_path + "/projections/" + image_names[i]);
 
             TemplatedImage<unsigned short> cropped;
             cropped = raw.getImageView().subImageView(crop_low(1), crop_low(0), cropped_size(1), cropped_size(0));
@@ -233,7 +223,7 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
                     }
                 }
             }
-            TORCH_CHECK_GT(img_min, intensity_threshold);
+            CHECK_GT(img_min, intensity_threshold);
 
             cropped.save(out_params.image_dir + "/" + new_image_names[i]);
             mask.save(out_params.mask_dir + "/" + new_image_names[i]);
@@ -317,26 +307,26 @@ void Convert(std::string kaust_dir, std::string out_dir, ivec2 crop_low, ivec2 c
 int main(int argc, const char* argv[])
 {
 
-    std::string input_base  = "/home/linus/repos/z_downloads/";
+    std::string input_base  = "scenes/";
     std::string output_base = "scenes/";
-    Convert(input_base + "/Pepper", output_base + "/pepper", ivec2(50, 20), ivec2(1880, 1400), 1);
+    Convert("Pepper", input_base + "/Pepper", output_base + "/pepper", ivec2(50, 20), ivec2(1880, 1400), 1);
     // Convert(input_base + "/Teapot_90kV", output_base + "/teapot", ivec2(-1, -1), ivec2(-1, 1350), 1, 17500);
     return 0;
-    Convert(input_base + "/marine_decoration", output_base + "/marine_decoration", ivec2(-1, -1), ivec2(-1, 1400), 1.);
-    Convert(input_base + "/monument", output_base + "/monument", ivec2(-1, -1), ivec2(-1, 1500), 1.);
-    Convert(input_base + "/toy_car", output_base + "/toy_car", ivec2(-1, -1), ivec2(-1, 1320), 1.);
-    Convert(input_base + "/pomegranate", output_base + "/pomegranate", ivec2(-1, -1), ivec2(-1, 1400), 1.);
-
-
-
-    Convert(input_base + "/star", output_base + "/star", ivec2(-1, -1), ivec2(-1, 1350), 1., 25000);
-    Convert(input_base + "/Plastic_flower", output_base + "/Plastic_flower", ivec2(-1, -1), ivec2(-1, 1300), 1, 20000);
-
-    Convert(input_base + "/Chest", output_base + "/Chest", ivec2(-1, -1), ivec2(-1, -1), 1.);
-    Convert(input_base + "/Fan", output_base + "/Fan", ivec2(-1, -1), ivec2(-1, -1), 1.);
-    Convert(input_base + "/Fruit", output_base + "/Fruit", ivec2(-1, -1), ivec2(-1, 1470), 1.);
-    Convert(input_base + "/RopeBall", output_base + "/RopeBall", ivec2(0, 0), ivec2(-1, 1450), 1.);
-    Convert(input_base + "/Textile_flower", output_base + "/Textile_flower", ivec2(-1, -1), ivec2(-1, 1350), 1.);
+//    Convert(input_base + "/marine_decoration", output_base + "/marine_decoration", ivec2(-1, -1), ivec2(-1, 1400), 1.);
+//    Convert(input_base + "/monument", output_base + "/monument", ivec2(-1, -1), ivec2(-1, 1500), 1.);
+//    Convert(input_base + "/toy_car", output_base + "/toy_car", ivec2(-1, -1), ivec2(-1, 1320), 1.);
+//    Convert(input_base + "/pomegranate", output_base + "/pomegranate", ivec2(-1, -1), ivec2(-1, 1400), 1.);
+//
+//
+//
+//    Convert(input_base + "/star", output_base + "/star", ivec2(-1, -1), ivec2(-1, 1350), 1., 25000);
+//    Convert(input_base + "/Plastic_flower", output_base + "/Plastic_flower", ivec2(-1, -1), ivec2(-1, 1300), 1, 20000);
+//
+//    Convert(input_base + "/Chest", output_base + "/Chest", ivec2(-1, -1), ivec2(-1, -1), 1.);
+//    Convert(input_base + "/Fan", output_base + "/Fan", ivec2(-1, -1), ivec2(-1, -1), 1.);
+//    Convert(input_base + "/Fruit", output_base + "/Fruit", ivec2(-1, -1), ivec2(-1, 1470), 1.);
+//    Convert(input_base + "/RopeBall", output_base + "/RopeBall", ivec2(0, 0), ivec2(-1, 1450), 1.);
+//    Convert(input_base + "/Textile_flower", output_base + "/Textile_flower", ivec2(-1, -1), ivec2(-1, 1350), 1.);
 
     return 0;
 }
