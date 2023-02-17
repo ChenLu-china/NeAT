@@ -178,7 +178,7 @@ class HierarchicalNeuralGeometry : public NeuralGeometry
     //      value [num_groups, group_size, num_channels]
     torch::Tensor SampleVolumeBatched(torch::Tensor global_coordinate, torch::Tensor sample_mask, torch::Tensor node_id)
     {
-        TORCH_CHECK_EQ(global_coordinate.dim(), 3);
+        CHECK_EQ(global_coordinate.dim(), 3);
         if (global_coordinate.numel() == 0)
         {
             return torch::empty({global_coordinate.size(0), global_coordinate.size(1), num_channels},
@@ -193,7 +193,7 @@ class HierarchicalNeuralGeometry : public NeuralGeometry
             SAIGA_OPTIONAL_TIME_MEASURE("DecodeFeatures", timer);
             density = DecodeFeatures(neural_features);
         }
-        TORCH_CHECK_EQ(density.dim(), sample_mask.dim());
+        CHECK_EQ(density.dim(), sample_mask.dim());
         density = density * sample_mask;
         return density;
     }

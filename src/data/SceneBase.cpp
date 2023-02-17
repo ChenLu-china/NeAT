@@ -11,11 +11,11 @@
 #include "utils/cimg_wrapper.h"
 vec2 PixelToUV(int x, int y, int w, int h)
 {
-    TORCH_CHECK_GE(x, 0);
-    TORCH_CHECK_GE(y, 0);
+    CHECK_GE(x, 0);
+    CHECK_GE(y, 0);
     ivec2 shape(h, w);
-    TORCH_CHECK_LT(x, shape(1));
-    TORCH_CHECK_LT(y, shape(0));
+    CHECK_LT(x, shape(1));
+    CHECK_LT(y, shape(0));
     vec2 s  = vec2(shape(1) - 1, shape(0) - 1);
     vec2 uv = (vec2(x, y)).array() / s.array();
     return uv;
@@ -40,8 +40,8 @@ torch::Tensor UnifiedImage::CoordinatesRandomNoInterpolate(int count, int w, int
 torch::Tensor UnifiedImage::CoordinatesRow(int row_start, int row_end, int w, int h)
 {
     int num_rows = row_end - row_start;
-    TORCH_CHECK_GT(num_rows, 0);
-    TORCH_CHECK_LE(row_end, h);
+    CHECK_GT(num_rows, 0);
+    CHECK_LE(row_end, h);
 
     torch::Tensor px_coords = torch::empty({w * num_rows, 2});
     vec2* pxs               = px_coords.data_ptr<vec2>();
@@ -181,7 +181,7 @@ RayList SceneBase::GetRays(torch::Tensor uv, torch::Tensor image_id, torch::Tens
     unproj = unproj / torch::norm(unproj, 2, 1, true);
 
     auto dir2 = pose->RotatePoint(unproj, image_id);
-    TORCH_CHECK_EQ(dir2.requires_grad(), unproj.requires_grad());
+    CHECK_EQ(dir2.requires_grad(), unproj.requires_grad());
 
     result.origin    = torch::index_select(pose->translation, 0, image_id).to(torch::kFloat32);
     result.direction = dir2;
@@ -320,8 +320,8 @@ SceneBase::SceneBase(std::string _scene_dir)
 
     {
         CameraBase cam(scene_path + "/camera.ini");
-        TORCH_CHECK_GT(cam.w, 0);
-        TORCH_CHECK_GT(cam.h, 0);
+        CHECK_GT(cam.w, 0);
+        CHECK_GT(cam.h, 0);
         cameras.push_back(cam);
     }
 
@@ -446,8 +446,8 @@ void SceneBase::LoadImagesCT(std::vector<int> indices)
             }
         }
 
-        TORCH_CHECK_EQ(converted.h, cameras[0].h);
-        TORCH_CHECK_EQ(converted.w, cameras[0].w);
+        CHECK_EQ(converted.h, cameras[0].h);
+        CHECK_EQ(converted.w, cameras[0].w);
 
         auto raw_tensor = ImageViewToTensor(converted.getImageView());
 
@@ -654,7 +654,7 @@ void SceneBase::InitializeBiasWithBackground(TensorBoardLogger* logger)
 }
 torch::Tensor SceneBase::SampleGroundTruth(torch::Tensor global_coordinates)
 {
-    TORCH_CHECK_EQ(global_coordinates.dim(), 2);
+    CHECK_EQ(global_coordinates.dim(), 2);
     CHECK(ground_truth_volume.defined());
     torch::nn::functional::GridSampleFuncOptions opt;
     opt.align_corners(true).padding_mode(torch::kBorder).mode(torch::kBilinear);

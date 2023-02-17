@@ -78,7 +78,7 @@ void HyperTreeStructureOptimizer::CreateVariables()
         node_data.I_split = solver->MakeBoolVar("");
         node_data.I_none  = solver->MakeBoolVar("");
         node_data.I_grp   = solver->MakeBoolVar("");
-        TORCH_CHECK_NOTNULL(node_data.I_none);
+        CHECK_NOTNULL(node_data.I_none);
 
 
         if (parent_id < 0)
@@ -113,7 +113,7 @@ void HyperTreeStructureOptimizer::CreateConstraints()
         int parent_id     = tree->node_parent.data_ptr<int>()[node_id];
         int* sibling_ids  = tree->node_children.data_ptr<int>() + parent_id * tree->node_children.stride(0);
         int* children_ids = tree->node_children.data_ptr<int>() + node_id * tree->node_children.stride(0);
-        TORCH_CHECK_NOTNULL(node_data.I_split);
+        CHECK_NOTNULL(node_data.I_split);
 
         // 1. The unique constraint
         //    Constraint that guarantees exactly one of the 3 modifiers is set.
@@ -135,7 +135,7 @@ void HyperTreeStructureOptimizer::CreateConstraints()
             for (int si = 0; si < tree->NS(); ++si)
             {
                 int s = sibling_ids[si];
-                TORCH_CHECK_GE(s, 0);
+                CHECK_GE(s, 0);
                 num_active_siblings += active_flag[s];
                 num_culled_siblings += culling_flag[s];
             }
@@ -147,10 +147,10 @@ void HyperTreeStructureOptimizer::CreateConstraints()
                 for (int si = 0; si < NS; ++si)
                 {
                     int s = sibling_ids[si];
-                    TORCH_CHECK_GE(s, 0);
+                    CHECK_GE(s, 0);
                     if (!culling_flag[s])
                     {
-                        TORCH_CHECK_NOTNULL(data[s].I_grp);
+                        CHECK_NOTNULL(data[s].I_grp);
                         c_merge_split->SetCoefficient(data[s].I_grp, 1.0 / num_active_siblings * fac);
                     }
                 }
@@ -165,11 +165,11 @@ void HyperTreeStructureOptimizer::CreateConstraints()
             for (int si = 0; si < NS; ++si)
             {
                 int c = children_ids[si];
-                TORCH_CHECK_GE(c, 0);
+                CHECK_GE(c, 0);
                 num_culled_children += culling_flag[c];
             }
 
-            TORCH_CHECK_LT(num_culled_children, NS);
+            CHECK_LT(num_culled_children, NS);
             c_merge_split->SetCoefficient(node_data.I_split, fac);
             max_patch_constraint->SetCoefficient(node_data.I_split, (NS - num_culled_children) * fac);
         }
@@ -213,9 +213,9 @@ void HyperTreeStructureOptimizer::CreateObjective()
         float loss_split;  // computed from children
 
         CHECK(std::isfinite(loss_none));
-        TORCH_CHECK_GE(loss_none, 0);
-        TORCH_CHECK_GE(max_density_none, 0);
-        TORCH_CHECK_GT(tree->node_depth.data_ptr<int>()[node_id], 0);
+        CHECK_GE(loss_none, 0);
+        CHECK_GE(max_density_none, 0);
+        CHECK_GT(tree->node_depth.data_ptr<int>()[node_id], 0);
 
         {
             // This node is the first child of the parent
@@ -235,7 +235,7 @@ void HyperTreeStructureOptimizer::CreateObjective()
                         // can happen if a node is not seen but culling is disabled.
                         if (sib_err < 0) sib_err = 0;
 
-                        TORCH_CHECK_GE(sib_err, 0);
+                        CHECK_GE(sib_err, 0);
                         sibling_error_sum += sib_err;
                         max_density_merge = std::max(sib_dens, max_density_merge);
                         num_non_culled_nodes++;
@@ -272,8 +272,8 @@ void HyperTreeStructureOptimizer::CreateObjective()
                     float child_err     = all_errors[c];
                     float child_density = all_density[c];
                     // child_err      = std::max(child_err, 0.f);
-                    TORCH_CHECK_GE(child_err, 0);
-                    TORCH_CHECK_GE(child_density, 0);
+                    CHECK_GE(child_err, 0);
+                    CHECK_GE(child_density, 0);
                     loss_split += child_err * child_density;
                 }
 
@@ -320,12 +320,12 @@ void HyperTreeStructureOptimizer::ApplySplit()
         int grp   = round(node_data.I_grp->solution_value());
         int none  = round(node_data.I_none->solution_value());
 
-        TORCH_CHECK_EQ(split + grp + none, 1) << split << " " << grp << " " << none;
+        CHECK_EQ(split + grp + none, 1) << split << " " << grp << " " << none;
 
         if (split)
         {
             // set children active
-            TORCH_CHECK_GE(children_ids[0], 0);
+            CHECK_GE(children_ids[0], 0);
 
             active_flag[node_id] = 0;
 
@@ -341,12 +341,12 @@ void HyperTreeStructureOptimizer::ApplySplit()
         }
         else if (grp)
         {
-            TORCH_CHECK_GE(parent_id, 0);
+            CHECK_GE(parent_id, 0);
             active_flag[node_id]   = 0;
             active_flag[parent_id] = 1;
 
             // This can not happen because when the parent is culled all its children should also be culled
-            TORCH_CHECK_EQ(culling_flag[parent_id], 0);
+            CHECK_EQ(culling_flag[parent_id], 0);
         }
         else if (none)
         {

@@ -7,9 +7,7 @@
 #include "saiga/vision/torch/CudaHelper.h"
 
 //Torch changed their logging and checking interface
-#define CHECK_EQ TORCH_CHECK_EQ
 #include "saiga/vision/torch/EigenTensor.h"
-#undef CHECK_EQ
 
 #include "SceneBase.h"
 

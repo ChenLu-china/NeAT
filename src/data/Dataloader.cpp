@@ -57,12 +57,12 @@ RowSampleData RowRaybasedSampleDataset::get_batch(torch::ArrayRef<size_t> sample
     int row_start = 0;
     int row_end   = 0;
 
-    TORCH_CHECK_GT(indices.size(), 0);
+    CHECK_GT(indices.size(), 0);
 
     int num_batches_per_image = iDivUp(out_h, rows_per_batch);
 
 
-    TORCH_CHECK_EQ(sample_indices.size(), 1);
+    CHECK_EQ(sample_indices.size(), 1);
     int image_id = sample_indices.front() / num_batches_per_image;
     int batch_id = sample_indices.front() % num_batches_per_image;
     row_start    = batch_id * rows_per_batch;

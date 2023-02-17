@@ -6,11 +6,7 @@
 
 #include "saiga/cuda/cuda.h"
 #include "saiga/vision/torch/CudaHelper.h"
-
-//Torch changed their logging and checking interface
-#define CHECK_EQ TORCH_CHECK_EQ
 #include "saiga/vision/torch/EigenTensor.h"
-#undef CHECK_EQ
 
 #include "IndirectGridSample3D.h"
 
@@ -847,7 +843,7 @@ std::vector<torch::Tensor> IndirectGridSample3D::backward(AutogradContext* ctx, 
     auto index                       = input[1];
     auto uv                          = input[2];
 
-    TORCH_CHECK_EQ(grad_output.size(), 1);
+    CHECK_EQ(grad_output.size(), 1);
 
     auto grad_multi_grid = torch::zeros_like(multi_grid);
     auto grad_uv         = torch::zeros_like(uv);
@@ -882,15 +878,15 @@ torch::Tensor IndirectGridSample3D(torch::Tensor multi_grid, torch::Tensor index
     CHECK(index.defined());
     CHECK(uv.defined());
 
-    TORCH_CHECK_EQ(multi_grid.dim(), 5);
-    TORCH_CHECK_EQ(index.dim(), 1);
-    TORCH_CHECK_EQ(uv.dim(), 2);
+    CHECK_EQ(multi_grid.dim(), 5);
+    CHECK_EQ(index.dim(), 1);
+    CHECK_EQ(uv.dim(), 2);
 
     // std::cout << "IndirectGridSample3D" << std::endl;
     // PrintTensorInfo(multi_grid);
     // PrintTensorInfo(index);
     // PrintTensorInfo(uv);
     auto result = torch::autograd::IndirectGridSample3D::apply(multi_grid, index, uv);
-    TORCH_CHECK_EQ(result.size(), 1);
+    CHECK_EQ(result.size(), 1);
     return result.front();
 }

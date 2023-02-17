@@ -6,11 +6,7 @@
 
 #pragma once
 
-//Torch changed their logging and checking interface
-#include "torch/torch.h"
-#define CHECK_EQ TORCH_CHECK_EQ
 #include "saiga/vision/torch/EigenTensor.h"
-#undef CHECK_EQ
 #include "saiga/vision/torch/ImageTensor.h"
 
 #include <chrono>
@@ -153,8 +149,8 @@ struct RayList
     template <int D>
     std::pair<Eigen::Vector<float, D>, Eigen::Vector<float, D>> GetRay(int i) const
     {
-        TORCH_CHECK_LT(i, size());
-        TORCH_CHECK_EQ(D, Dim());
+        CHECK_LT(i, size());
+        CHECK_EQ(D, Dim());
         Eigen::Vector<float, D> o;
         Eigen::Vector<float, D> d;
         for (int k = 0; k < D; ++k)

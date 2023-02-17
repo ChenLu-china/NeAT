@@ -8,10 +8,7 @@
 
 #include "saiga/cuda/cuda.h"
 #include "saiga/vision/torch/CudaHelper.h"
-//Torch changed their logging and checking interface
-#define CHECK_EQ TORCH_CHECK_EQ
 #include "saiga/vision/torch/EigenTensor.h"
-#undef CHECK_EQ
 #include "HyperTree.h"
 
 
@@ -33,8 +30,8 @@ struct DeviceHyperTree
         node_active       = tree->node_active;
         node_children     = tree->node_children;
         //        node_diagonal_length = tree->node_diagonal_length;
-        TORCH_CHECK_EQ(node_position_min.strides[1], 1);
-        TORCH_CHECK_EQ(node_position_max.strides[1], 1);
+        CHECK_EQ(node_position_min.strides[1], 1);
+        CHECK_EQ(node_position_max.strides[1], 1);
     }
 
     __device__ Vec PositionMin(int node_id)
@@ -126,7 +123,7 @@ torch::Tensor HyperTreeBaseImpl::ComputeLocalSamples(torch::Tensor global_sample
     if (global_samples.dim() == 3 && node_indices.dim() == 1)
     {
 #if 0
-        TORCH_CHECK_EQ(global_samples.dim(), 3);
+        CHECK_EQ(global_samples.dim(), 3);
         if (global_samples.size(0) > 0)
         {
             switch (D())
@@ -423,7 +420,7 @@ SampleList HyperTreeBaseImpl::CreateSamplesForRays(const RayList& rays, int max_
     int actual_samples          = out_num_samples_max_per_ray.data_ptr<int>()[0];
     list.max_samples_per_ray    = out_num_samples_max_per_ray.data_ptr<int>()[1];
     list.Shrink(actual_samples);
-    TORCH_CHECK_LE(actual_samples, predicted_samples);
+    CHECK_LE(actual_samples, predicted_samples);
 
     {
         // Use this method for position computation to get the correct positional gradient
@@ -487,10 +484,10 @@ static __global__ void ComputeIndexOrder(StaticDeviceTensor<long, 1> node_id,
 NodeBatchedSamples HyperTreeBaseImpl::GroupSamplesPerNodeGPU(const SampleList& samples, int group_size)
 {
     auto device = samples.global_coordinate.device();
-    TORCH_CHECK_EQ(device, active_node_ids.device());
+    CHECK_EQ(device, active_node_ids.device());
     int num_samples = samples.size();
     int num_nodes   = NumNodes();
-    // TORCH_CHECK_GT(num_samples, 0);
+    // CHECK_GT(num_samples, 0);
 
     torch::Tensor num_samples_per_node = torch::zeros({num_nodes}, torch::TensorOptions(device).dtype(torch::kInt));
 
@@ -676,7 +673,7 @@ std::tuple<torch::Tensor, torch::Tensor> HyperTreeBaseImpl::NodeIdForPositionGPU
 
     CHECK(samples_linear.is_contiguous());
 
-    TORCH_CHECK_EQ(D(), 3);
+    CHECK_EQ(D(), 3);
     if (num_samples > 0)
     {
         ComputeNodeId<3><<<iDivUp(num_samples, 256), 256>>>(samples_linear, this, result_node_id, result_mask);
@@ -770,8 +767,8 @@ torch::Tensor HyperTreeBaseImpl::InterpolateGridForInactiveNodes(torch::Tensor a
 
     // float [num_nodes, 8, 11, 11, 11]
     torch::Tensor interpolated = active_grid.clone();
-    TORCH_CHECK_EQ(D(), 3);
-    TORCH_CHECK_EQ(interpolated.size(2), 11);
+    CHECK_EQ(D(), 3);
+    CHECK_EQ(interpolated.size(2), 11);
 
     PrintTensorInfo(active_grid);
     ::InterpolateGridForInactiveNodes<3><<<NumNodes(), 128>>>(this, active_grid, interpolated);
@@ -817,7 +814,7 @@ static __global__ void UniformGlobalSamples(DeviceHyperTree<D> tree, StaticDevic
 }
 torch::Tensor HyperTreeBaseImpl::UniformGlobalSamples(torch::Tensor node_id, int grid_size)
 {
-    TORCH_CHECK_EQ(node_id.dim(), 1);
+    CHECK_EQ(node_id.dim(), 1);
 
     int N   = node_id.size(0);
     node_id = node_id.to(torch::kInt);
@@ -935,7 +932,7 @@ SampleList HyperTreeBaseImpl::NodeNeighborSamples(Eigen::Vector<int, -1> size, d
     out_num_samples    = out_num_samples.cpu();
     int actual_samples = out_num_samples.data_ptr<int>()[0];
     list.Shrink(actual_samples);
-    TORCH_CHECK_LE(actual_samples, predicted_samples);
+    CHECK_LE(actual_samples, predicted_samples);
 
     CUDA_SYNC_CHECK_ERROR();
     return list;
