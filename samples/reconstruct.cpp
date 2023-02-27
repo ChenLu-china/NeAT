@@ -404,7 +404,7 @@ class Trainer
             scene->OptimizerStep(epoch_id, only_image_params);
 
             float avg_per_image_loss_float = avg_per_image_loss.item().toFloat();
-            tblogger->add_scalar("Loss" + name + "/" + scene->scene_name + "/batch", global_batch_id,
+            tblogger->add_scalar("NeAT/Loss" + name + "/" + scene->scene_name + "/batch", global_batch_id,
                                  avg_per_image_loss_float);
             batch_loss.push_back(avg_per_image_loss_float);
             // tblogger->add_scalar("TrainLoss/param", global_batch_id,
