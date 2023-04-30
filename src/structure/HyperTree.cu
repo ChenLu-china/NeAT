@@ -300,6 +300,9 @@ static __global__ void ComputeRaySamples(
         global_sample_offset = atomicAdd(out_num_samples, num_samples_of_ray);
         atomicMax(out_num_samples + 1, num_samples_of_ray);
 
+        if(global_sample_offset + num_samples_of_ray >= out_weight.sizes[0]){
+            printf("%d, %d, %d:", global_sample_offset,num_samples_of_ray ,out_weight.sizes[0]);
+        }
         CUDA_KERNEL_ASSERT(global_sample_offset + num_samples_of_ray < out_weight.sizes[0]);
     }
 
@@ -394,7 +397,9 @@ SampleList HyperTreeBaseImpl::CreateSamplesForRays(const RayList& rays, int max_
     CHECK(rays.direction.is_cuda());
     CHECK(node_position_min.is_cuda());
 
-    int predicted_samples = iCeil(rays.size() * max_samples_per_node * pow(NumActiveNodes(), 1.0 / D()));
+   // std::cout << "facs_:" <<rays.size() <<  " x " << max_samples_per_node << " x "<<  pow(NumActiveNodes(), 1.0 / D());
+    int predicted_samples = iCeil(rays.size() * max_samples_per_node * NumActiveNodes());//pow(NumActiveNodes(), 1.0 / D()));
+   // std::cout << " pred_sample: "  <<predicted_samples<< std::endl;
     SampleList list;
     list.Allocate(predicted_samples, D(), node_position_min.device());
 
