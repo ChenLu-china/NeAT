@@ -12,7 +12,6 @@
 #include "saiga/core/util/ProgressBar.h"
 #include "saiga/vision/torch/ImageTensor.h"
 
-#include "Settings.h"
 
 #include "build_config.h"
 #include "tensorboard_logger.h"
