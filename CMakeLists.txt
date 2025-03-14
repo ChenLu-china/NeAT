@@ -23,6 +23,11 @@ OptionsHelper(HEADLESS "Skips the viewer and other apps that require a window." 
 # Dep: https://www.scipopt.org/index.php#download
 # -> Download .deb and install
 set(BUILD_absl ON)
+set(BUILD_CoinUtils ON)
+set(BUILD_Cbc ON)
+set(BUILD_Osi ON)
+set(BUILD_Clp ON)
+set(BUILD_Cgl ON)
 set(BUILD_Protobuf OFF)
 set(BUILD_gflags OFF)
 set(USE_COINOR ON)
